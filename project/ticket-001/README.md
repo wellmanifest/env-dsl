@@ -60,3 +60,11 @@ Published `wellmanifest/new-project` v0.18.0 accepts and validates the required
 `769183ca27593af1d166acee11bc9e37decf9870`; its lock records
 `publicationStatus=published`. Implementation may resume inside the unchanged
 ticket scope.
+
+## Authorized delivery boundary
+
+- Seed baseline: `main@d8ffe2c706bd06952311029571ecef8b1787b2a0`.
+- Complexity: L; at most 15 implementation files, 5 affected components, 3
+  public-interface changes and 0 runtime dependencies.
+- Implementation branch: `ticket/001-env-dsl-standard`; remote publication is
+  not part of the seed authorization.

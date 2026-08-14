@@ -55,6 +55,9 @@ request, merge, tag or release.
 - Corrected the pre-existing `.com` typo in the managed attestation predicate
   back to canonical `.dev`; the restored v0.17 base matched its recorded hash
   before the managed upgrade and the v0.18 adoption check is now up to date.
+- Created the single local governance seed commit
+  `d8ffe2c706bd06952311029571ecef8b1787b2a0` with no remote and no
+  implementation paths, then bound the ordinary delivery plan to that SHA.
 
 ## Risks
 
@@ -78,7 +81,9 @@ request, merge, tag or release.
 - The external prerequisite is resolved without an unpublished bypass.
 - The same ticket and bounded scope are reused; no second target ticket was
   allocated.
-- The next atomic action is the single local seed-baseline commit, followed by
-  recording its SHA as `delivery.acceptedBaseSha` before implementation.
+- The single local seed-baseline commit is recorded as
+  `delivery.acceptedBaseSha`; implementation may now begin.
 - `src/**` was removed from the allowlist after the seed gate correctly routed
   it to the `application` workstream; conformance code stays under `tests/**`.
+- The seed transaction is complete. Implementation now proceeds only on
+  `ticket/001-env-dsl-standard` within the recorded L budget.

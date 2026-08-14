@@ -14,3 +14,5 @@
   the target to its exact published commit and resumed this same ticket.
 - Narrowed the implementation allowlist to the integration workstream by
   keeping checker/conformance code under `tests/**` rather than `src/**`.
+- Created the one local seed baseline and bound the full delivery plan to its
+  real commit SHA before adding implementation files.

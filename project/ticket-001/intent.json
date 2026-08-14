@@ -42,5 +42,96 @@
     "shape": "domain_pack",
     "runtimeOwner": "wellmanifest",
     "adopt": ["wellmanifest/dsl"]
+  },
+  "delivery": {
+    "acceptedBaseSha": "d8ffe2c706bd06952311029571ecef8b1787b2a0",
+    "targetBranch": "main",
+    "outcome": "Define Env DSL v1 as a portable inert SNAKE_CASE constants standard with deterministic conformance and Wellmanifest DSL metadata",
+    "nonGoals": [
+      "Do not edit wellmanifest/dsl/src/dsl_check.py in this repository",
+      "Do not define or transport secrets",
+      "Do not execute, source, evaluate or interpolate Env DSL documents",
+      "Do not implement language-specific loaders, regex compilers, a CLI or a daemon",
+      "Do not create a remote repository, push, merge, tag or publish this target in the seed transaction"
+    ],
+    "complexity": "L",
+    "estimatedMinutes": 30,
+    "budgets": {
+      "maxImplementationFiles": 15,
+      "maxAffectedComponents": 5,
+      "maxPublicInterfaceChanges": 3,
+      "maxRuntimeDependencies": 0
+    },
+    "architecture": {
+      "status": "accepted",
+      "decision": "Use a strict dotenv-shaped data language, a language-neutral ABNF grammar and a dependency-free conformance checker; all evaluation and type conversion belong to consumer adapters",
+      "components": [
+        {
+          "name": "normative-language",
+          "paths": ["spec/ENV_DSL.md", "spec/env-dsl.abnf"]
+        },
+        {
+          "name": "conformance",
+          "paths": ["tests/**"]
+        },
+        {
+          "name": "portable-examples",
+          "paths": ["examples/**"]
+        },
+        {
+          "name": "dsl-publication",
+          "paths": ["dsl-manifest.json"]
+        },
+        {
+          "name": "architecture-guidance",
+          "paths": ["docs/**"]
+        }
+      ],
+      "responsibilityChanges": true,
+      "interfaceChanges": [
+        "Publish the Env DSL v1 document syntax and layering semantics",
+        "Publish stable ENV-* conformance diagnostic codes",
+        "Publish a digest-bound wellmanifest.dsl manifest"
+      ],
+      "dataChanges": [
+        "Represent environment constants as inert SNAKE_CASE=value records",
+        "Represent regular expressions as literal pattern text without host-language constructors"
+      ],
+      "ui": {
+        "impact": "none",
+        "states": [],
+        "evidence": []
+      },
+      "rollback": "Before publication, revert the ticket implementation commits; after publication, retain v1 and prepare a backward-compatible successor"
+    },
+    "runtimeDependencies": [],
+    "validation": [
+      {
+        "criterion": "AC-01",
+        "commands": ["python3 tests/env_dsl_check.py validate examples/valid/dsl-check.env"],
+        "evidence": "project/ticket-001/ai-codex-logs.txt"
+      },
+      {
+        "criterion": "AC-07",
+        "commands": ["python3 -m unittest discover -s tests -p 'test_*.py'"],
+        "evidence": "project/ticket-001/ai-codex-logs.txt"
+      },
+      {
+        "criterion": "AC-08",
+        "commands": [
+          "python3 ../dsl/src/dsl_check.py validate dsl-manifest.json",
+          "python3 ../dsl/src/dsl_check.py standards dsl-manifest.json"
+        ],
+        "evidence": "project/ticket-001/ai-codex-logs.txt"
+      },
+      {
+        "criterion": "AC-10",
+        "commands": [
+          "./project/governance-check.sh --actor agent",
+          "git diff --check"
+        ],
+        "evidence": "project/ticket-001/ai-codex-logs.txt"
+      }
+    ]
   }
 }
