@@ -5,7 +5,7 @@
   "name": "Wellmanifest Env DSL",
   "version": "0.1.0-dev",
   "status": "experimental",
-  "purpose": "Portable inert environment constants with explicit identity and deterministic layering",
+  "purpose": "Portable inert environment constants, operator equations and conditions with deterministic layering",
   "domain": "environment-configuration",
   "owners": [
     {
@@ -39,42 +39,47 @@
     {
       "path": "spec/env-dsl.abnf",
       "role": "normative-source",
-      "digest": "sha256:ece83a4bab3b1e272ef5cafec258d0077c132fe8751afadfe30c4fb84d185780"
+      "digest": "sha256:24e60c97c4729cd528942abf1db3512caef11c3edf121c546e2d55d68407c486"
     },
     {
       "path": "spec/ENV_DSL.md",
       "role": "documentation",
-      "digest": "sha256:dca734a43cdb5187712cf871c0f510b592e73628523037844849751362f50afb"
+      "digest": "sha256:82e2ece7b6fe036fbcfeddd93d2c65191b8f9d58096cf5325f03c7a90722cc9e"
     },
     {
       "path": "tests/env_dsl_check.py",
       "role": "parser-contract",
-      "digest": "sha256:1c229bf853022fcc4cd9271b04a6af1083f0995ff7301262dd1bada5e476c948"
+      "digest": "sha256:5bf2e2b0983f9bbe421278a2eb76f485a5fee4c10cd820a19bfd5d1ac6e2dc24"
     },
     {
       "path": "tests/test_env_dsl.py",
       "role": "parser-contract",
-      "digest": "sha256:d6633661b0daf2a4c8fdb6476373981a22110fbfc1221d5b8177ea16fb9be8da"
+      "digest": "sha256:3f504ab8a4630e784aa92bed66003e68556b62a980989139e84ed9324b7612a5"
     },
     {
       "path": "examples/valid/dsl-check.env",
       "role": "example",
-      "digest": "sha256:fa6a0d445b86291a03812314522bad4df75b55165674c0818fa3625b1d82bcf3"
+      "digest": "sha256:1faa7539cded1bba9de7e8fdc8bef99dd5fbab5f53f2dacfdede2be0b32d9fbb"
     },
     {
       "path": "examples/invalid/nonportable.env",
       "role": "example",
-      "digest": "sha256:7627489b68756c1a5bb6b76971fe641d2a339e50d6e39dcda4c2b7eafa1ffd19"
+      "digest": "sha256:d5f60de082c734408dd92f964f75eb0279c8e4405435f6f44988a3c5ddfbc6b8"
     },
     {
       "path": "docs/ARCHITECTURE.md",
       "role": "documentation",
-      "digest": "sha256:538bd37cd8be5ab7a1168549a8313bfde9016260e64eb3816e8f0ee18fcc0956"
+      "digest": "sha256:845fcaf1012cd676f0b3c8dc7c1742fb4b2bdfb195984274b7055ecd0e0dc323"
     },
     {
       "path": "docs/LOGIC_FLOW.md",
       "role": "documentation",
-      "digest": "sha256:3a4957d00ddf8a0a1ae0f69d69d8dabe78dd4a1c043fdccb7c5a6c406e2738e7"
+      "digest": "sha256:e01812c961d94be97373df0ec151bf69951a481a041a3c948960a1a35de91eb7"
+    },
+    {
+      "path": "docs/ERROR/ENV-EXPRESSION-001.md",
+      "role": "documentation",
+      "digest": "sha256:d6bd2ac60bc3ed42f5504b8894da90cafbdd35a8dbfc9ee93fd406e5f7c70ffb"
     },
     {
       "path": "docs/ERROR/ENV-SYNTAX-001.md",
@@ -132,6 +137,7 @@
     "criticalRoot": "docs/CRITICAL",
     "commands": [],
     "errorCodes": [
+      "ENV-EXPRESSION-001",
       "ENV-LAYER-001",
       "ENV-SEMANTIC-001",
       "ENV-SYNTAX-001"
@@ -169,6 +175,7 @@
     ],
     "commands": [
       "python3 tests/env_dsl_check.py validate examples/valid/dsl-check.env",
+      "python3 tests/env_dsl_check.py evaluate examples/valid/dsl-check.env",
       "python3 tests/env_dsl_check.py self-test",
       "python3 -m unittest discover -s tests -p 'test_*.py'"
     ],

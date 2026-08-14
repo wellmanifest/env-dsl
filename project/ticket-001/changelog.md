@@ -22,3 +22,7 @@
   pages, valid/invalid fixtures and seven dependency-free unit tests.
 - Added digest-bound Wellmanifest DSL metadata and architecture/logic-flow
   documentation defining the consumer-owned compilation boundary.
+- Added portable `*_EXPRESSION` and `*_CONDITION` equations with explicit
+  references, scalar typing, operator precedence and effect-free evaluation.
+- Added stable `ENV-EXPRESSION-001` diagnostics plus deterministic checks for
+  missing references, cycles, type errors, division and post-layer resolution.

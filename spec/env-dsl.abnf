@@ -21,4 +21,31 @@ value-char       = %x21-7E
 printable        = %x20-7E
 upper            = %x41-5A
 
+; A name ending _EXPRESSION or _CONDITION gives its value this grammar.
+expression       = or-expression
+or-expression    = and-expression *("||" and-expression)
+and-expression   = equal-expression *("&&" equal-expression)
+equal-expression = order-expression *(equal-op order-expression)
+order-expression = add-expression *(order-op add-expression)
+add-expression   = multiply-expression *(add-op multiply-expression)
+multiply-expression = unary-expression *(multiply-op unary-expression)
+unary-expression = *("!" / "-") primary-expression
+primary-expression = reference / boolean / integer / string-atom
+                     / ("(" expression ")")
+
+reference        = "@" name
+boolean          = "TRUE" / "FALSE"
+integer          = "0" / nonzero *DIGIT
+string-atom      = ":" 1*atom-char
+equal-op         = "==" / "!="
+order-op         = "<" / "<=" / ">" / ">="
+add-op           = "+" / "-"
+multiply-op      = "*" / "/" / "%"
+nonzero          = %x31-39
+
+; Printable non-space ASCII excluding quotes, backtick, parentheses and
+; operator characters. More complex strings are referenced ordinary constants.
+atom-char        = %x23-24 / %x2C / %x2E / %x30-3B / %x3F-5F
+                   / %x61-7B / %x7D-7E
+
 ; Imported core rules: DIGIT = %x30-39, LF = %x0A, SP = %x20.

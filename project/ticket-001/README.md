@@ -3,7 +3,7 @@
 - **ID**: ticket-001
 - **Owner**: unresolved:human
 - **Status**: IN_PROGRESS
-- **Workflow state**: EDIT
+- **Workflow state**: VALIDATION
 - **Created**: 2026-08-14
 
 ## Goal and scope
@@ -41,7 +41,7 @@ DSL and belong to a consumer adapter.
   boundary and consumer-owned compilation/type-conversion boundary.
 - [x] AC-10: Governance, unit, self-test, DSL manifest, link, secret and
   repository-diff checks pass with recorded evidence.
-- [ ] AC-11: Portable scalar expressions and boolean conditions use explicit
+- [x] AC-11: Portable scalar expressions and boolean conditions use explicit
   `@SNAKE_CASE` references, normative precedence and deterministic evaluation
   without host-language `eval` or ambient environment access.
 

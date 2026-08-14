@@ -69,6 +69,11 @@ request, merge, tag or release.
   `wellmanifest.dsl/manifest/v1` adoption manifest.
 - Validated the result with the target governance gate and the pinned local
   `wellmanifest/dsl` checker; no runtime dependency was introduced.
+- Extended the same inert record format with suffix-typed `*_EXPRESSION` and
+  `*_CONDITION` equations, explicit `@SNAKE_CASE` references, portable scalar
+  types, normative precedence and deterministic post-layer evaluation.
+- Added static undefined-reference and dependency-cycle rejection, arithmetic,
+  comparison and boolean operator checks, and expanded the suite to 12 tests.
 
 ## Risks
 
@@ -96,7 +101,7 @@ request, merge, tag or release.
   `delivery.acceptedBaseSha`; implementation may now begin.
 - `src/**` was removed from the allowlist after the seed gate correctly routed
   it to the `application` workstream; conformance code stays under `tests/**`.
-- The implementation is complete on `ticket/001-env-dsl-standard` within the
-  recorded L budget. The user then explicitly expanded the same unpublished
-  workstream to cover operator equations and conditions; ticket-001 returned
-  to `EDIT` and retains the same bounded paths and dependency budget.
+- The expanded implementation is complete on
+  `ticket/001-env-dsl-standard` within the recorded L budget: 14
+  implementation files, 5 components, 3 interfaces and 0 runtime dependencies.
+  The ticket returned to local validation pending any publication decision.

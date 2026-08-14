@@ -233,3 +233,43 @@ SESSION_EXECUTION_AUTHORIZATION=EXPANDED
 TICKET_REUSED=ticket-001
 WORKFLOW_STATE=IN_PROGRESS/EDIT
 BOUNDARY="suffix-typed inert equations; deterministic semantics; no host eval or effects"
+
+2026-08-14 expression implementation validation
+IMPLEMENTATION_FILE_COUNT=14
+RUNTIME_DEPENDENCY_COUNT=0
+EXPRESSION_FORMS=*_EXPRESSION,*_CONDITION
+REFERENCE_FORM=@SNAKE_CASE
+OPERATORS="!,-,*,/,%,+,-,<,<=,>,>=,==,!=,&&,||"
+
+$ python3 tests/env_dsl_check.py validate examples/valid/dsl-check.env
+ENV-PASS: passed (1 documents, 0 errors)
+EXIT_CODE=0
+
+$ python3 tests/env_dsl_check.py evaluate examples/valid/dsl-check.env
+BASE_SCHEMA_CONDITION=TRUE
+NEXT_MAJOR_EXPRESSION=2
+EXIT_CODE=0
+
+$ python3 tests/env_dsl_check.py self-test
+ENV-SELF-TEST-PASS
+EXIT_CODE=0
+
+$ python3 -m unittest discover -s tests -p 'test_*.py'
+Ran 12 tests
+OK
+EXIT_CODE=0
+
+$ python3 ../dsl/src/dsl_check.py validate dsl-manifest.json
+DSL-PASS: passed (0 errors)
+EXIT_CODE=0
+
+$ python3 ../dsl/src/dsl_check.py standards dsl-manifest.json
+DSL-PASS: passed (0 errors)
+EXIT_CODE=0
+
+$ ./project/governance-check.sh --actor agent --base main --head HEAD
+GOV-PASS: passed (0 errors, 0 warnings)
+EXIT_CODE=0
+
+SECRET_SCAN=PASS:governance-gate
+DIFF_CHECK=PASS
