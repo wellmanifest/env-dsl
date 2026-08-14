@@ -1,0 +1,169 @@
+2026-08-14 bootstrap
+$ goal governance adopt --source-revision 4d0a61837245b2906ce19c75c050fea1bc12adf2 --target-root . --check
+Error: the canonical standard has no verifiable published GitHub Release v0.17.0
+EXIT_CODE=1
+Note: unauthenticated GitHub API rate limit was exhausted; no files were written.
+
+$ goal governance adopt --source-revision 4d0a61837245b2906ce19c75c050fea1bc12adf2 --target-root . --check
+CREATE .github/workflows/new-project-governance.yml
+CREATE .governance/approval-evidence.schema.json
+CREATE .governance/branch_lifecycle_check.py
+CREATE .governance/change-evaluation.schema.json
+CREATE .governance/check_required_checks.py
+CREATE .governance/decision-record.schema.json
+CREATE .governance/decision_record.py
+CREATE .governance/diagnostics.json
+CREATE .governance/diagnostics.schema.json
+CREATE .governance/error/GOV-REMEDIATION-INTENT.md
+CREATE .governance/error/GOV-TICKET-001.md
+CREATE .governance/error/GOV-TICKET-ALLOCATION.md
+CREATE .governance/error/GOV-WORKSPACE-LIFECYCLE.md
+CREATE .governance/error/README.md
+CREATE .governance/governance_check.py
+CREATE .governance/intent.schema.json
+CREATE .governance/lock.schema.json
+CREATE .governance/manifest.base.json
+CREATE .governance/manifest.json
+CREATE .governance/manifest.schema.json
+CREATE .governance/package-manifest.json
+CREATE .governance/remediation-intent.schema.json
+CREATE .governance/remediation-intent.template.dsl.json
+CREATE .governance/remediation_intent.py
+CREATE .governance/required-checks.json
+CREATE .governance/stack-profiles.json
+CREATE .governance/work-classification.dsl.json
+CREATE .governance/work-classification.schema.json
+CREATE .governance/workspace_lifecycle_check.py
+CREATE AGENTS.md
+CREATE project.bat
+CREATE project.sh
+CREATE project/governance-check.bat
+CREATE project/governance-check.sh
+CREATE project/new-ticket.sh
+CREATE project/readme.sh
+CREATE scripts/runtime.sh
+CREATE .governance/manifest.lock.json
+drift detected: 38 change(s) required
+MISSING target prerequisite CHANGELOG.md
+MISSING target prerequisite README.md
+MISSING target prerequisite TODO.md
+MISSING target prerequisite VERSION
+MISSING target prerequisite project/TICKETS.md
+EXIT_CODE=1
+
+$ goal governance adopt --source-revision 4d0a61837245b2906ce19c75c050fea1bc12adf2 --target-root .
+adopted wellmanifest/new-project 0.17.0 at 4d0a61837245b2906ce19c75c050fea1bc12adf2
+MISSING target prerequisite CHANGELOG.md
+MISSING target prerequisite README.md
+MISSING target prerequisite TODO.md
+MISSING target prerequisite VERSION
+MISSING target prerequisite project/TICKETS.md
+EXIT_CODE=0
+
+$ ./project/new-ticket.sh --title "Define Env DSL portable environment constants standard" --agent codex --workstream integration --kind FEATURE --priority P1 --origin requested
+Successfully scaffolded project/ticket-001 for 'Define Env DSL portable environment constants standard'.
+EXIT_CODE=0
+
+$ goal governance adopt --source-revision 4d0a61837245b2906ce19c75c050fea1bc12adf2 --target-root . --check
+up-to-date wellmanifest/new-project 0.17.0 at 4d0a61837245b2906ce19c75c050fea1bc12adf2
+EXIT_CODE=0
+
+$ ./project/governance-check.sh --actor agent
+GOV-DIFF-001 ERROR: Git could not determine the changed-path set
+  remediation: Use repository-relative changed paths and fetch the complete base/head history before retrying.
+GOV-INTENT-002 ERROR: Ticket intent is invalid: intent must contain exactly the v3 fields [project/ticket-001/intent.json]
+  remediation: Create a valid new-project.intent/v3 file before implementation.
+GOV-FAIL: failed (2 errors, 0 warnings)
+EXIT_CODE=1
+
+BLOCKER_EVIDENCE
+- Published target validator contains no placement contract.
+- Current Governance Hub worktree adds placement only as an uncommitted change.
+- No implementation path and no local commit were created.
+
+$ ./project/readme.sh
+Updated project/TICKETS.md ticket index successfully.
+
+FINAL_LOCAL_STATE
+TICKET_STATUS=BLOCKED
+HEAD_STATE=unborn
+REMOTE_COUNT=0
+IMPLEMENTATION_PATH_COUNT=0
+
+2026-08-14 resume attempt
+USER_REQUEST="wykonaj"
+SESSION_EXECUTION_AUTHORIZATION=RECONFIRMED
+
+$ gh release list --repo wellmanifest/new-project --limit 10
+new-project v0.17.0  Latest  v0.17.0  2026-08-14T10:45:47Z
+
+$ gh pr list --repo wellmanifest/new-project --state open
+[]
+
+BLOCKER_RECHECK
+- No published revision newer than v0.17.0 exists.
+- No open new-project pull request can supply reviewed placement support.
+- The Governance Hub has foreign dirty work and an active ticket-077 writer;
+  those changes were preserved and not staged, committed or published here.
+- The Env DSL ticket remains BLOCKED with no implementation and unborn HEAD.
+
+2026-08-14 second resume attempt
+USER_REQUEST="kontynuuj"
+
+$ gh release list --repo wellmanifest/new-project --limit 5
+new-project v0.17.0  Latest  v0.17.0  2026-08-14T10:45:47Z
+
+$ gh pr list --repo wellmanifest/new-project --state open
+[]
+
+$ git ls-remote --heads https://github.com/wellmanifest/new-project.git
+eab2f4641364cbbc481a620f357a31ee6a2b5000 refs/heads/main
+
+CANONICAL_REMEDIATION="Create a schema-valid intent.json with bounded allowedPaths and required delivery evidence."
+RESULT=BLOCKED
+REASON="No published schema can validate the required placement field; no reviewed remote branch exists."
+
+2026-08-14 autonomous unblock attempt
+USER_REQUEST="to zrob to autonomicznie"
+AUTHORIZATION_SCOPE="prepare and publish the placement prerequisite, then resume env-dsl"
+
+HUB_CONCURRENCY_EVIDENCE
+- An active Codex process has git toplevel wellmanifest/new-project.
+- The shared worktree is on ticket/077-agent-report-identity.
+- ticket-077 is IN_PROGRESS / EDIT in the only manifest workstream: governance.
+- ticket-077 explicitly forbids governance/intent.schema.json and identifies
+  placement as a separate ongoing change.
+- The worktree still contains dirty placement changes outside ticket-077.
+- The active writer remained alive through repeated bounded waits.
+
+RESULT=BLOCKED
+REASON="C-CONCURRENCY-001/003 forbids a second writer or taking over foreign dirty work; ticket-077 must release the sole governance workstream first."
+
+2026-08-14 prerequisite resolved
+NEW_PROJECT_RELEASE=v0.18.0
+NEW_PROJECT_RELEASE_COMMIT=769183ca27593af1d166acee11bc9e37decf9870
+NEW_PROJECT_RELEASE_URL=https://github.com/wellmanifest/new-project/releases/tag/v0.18.0
+PLACEMENT_TICKETS=ticket-078,ticket-079:DONE
+
+$ goal governance adopt --source-revision 769183ca27593af1d166acee11bc9e37decf9870 --target-root . --check
+RESULT=DRIFT:10-managed-updates
+
+PRE_UPGRADE_BASE_REPAIR=wellmanifest.com-to-wellmanifest.dev
+PRE_UPGRADE_BASE_HASH=e55afc3d898356f590f47155ceb9943fb03adb2cb4992df1cf105cb65304f686
+LOCK_EXPECTED_BASE_HASH=e55afc3d898356f590f47155ceb9943fb03adb2cb4992df1cf105cb65304f686
+
+$ goal governance adopt --source-revision 769183ca27593af1d166acee11bc9e37decf9870 --target-root . --upgrade
+adopted wellmanifest/new-project 0.18.0 at 769183ca27593af1d166acee11bc9e37decf9870
+EXIT_CODE=0
+
+$ goal governance adopt --source-revision 769183ca27593af1d166acee11bc9e37decf9870 --target-root . --check
+up-to-date wellmanifest/new-project 0.18.0 at 769183ca27593af1d166acee11bc9e37decf9870
+EXIT_CODE=0
+
+TICKET_STATE=IN_PROGRESS/EDIT
+IMPLEMENTATION_PRESENT=false
+
+$ ./project/governance-check.sh --actor agent
+GOV-DIFF-001=EXPECTED_UNBORN_HEAD
+GOV-WORKSTREAM-003=src/** belongs to application, not integration
+REMEDIATION=remove src/** and keep the checker under tests/**
