@@ -1,0 +1,24 @@
+; Env DSL 1 canonical line grammar, RFC 5234 notation.
+; Semantic constraints, reserved names and layering are defined in ENV_DSL.md.
+
+document         = trivia version-line trivia namespace-line trivia
+                   environment-line trivia [extends-line trivia]
+                   *(assignment-line trivia)
+
+trivia           = *(blank-line / comment-line)
+blank-line       = *SP LF
+comment-line     = *SP "#" *printable LF
+
+version-line     = "ENV_DSL_VERSION=1" LF
+namespace-line   = "ENV_DSL_NAMESPACE=" name LF
+environment-line = "ENV_DSL_ENVIRONMENT=" name LF
+extends-line     = "ENV_DSL_EXTENDS=" name LF
+assignment-line  = name "=" value LF
+
+name             = upper *(upper / DIGIT) *("_" 1*(upper / DIGIT))
+value            = 1*value-char
+value-char       = %x21-7E
+printable        = %x20-7E
+upper            = %x41-5A
+
+; Imported core rules: DIGIT = %x30-39, LF = %x0A, SP = %x20.

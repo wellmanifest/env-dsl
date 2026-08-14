@@ -1,0 +1,207 @@
+{
+  "$schema": "https://wellmanifest.dev/schemas/dsl-manifest/v1",
+  "schema": "wellmanifest.dsl/manifest/v1",
+  "id": "wellmanifest.env",
+  "name": "Wellmanifest Env DSL",
+  "version": "0.1.0-dev",
+  "status": "experimental",
+  "purpose": "Portable inert environment constants with explicit identity and deterministic layering",
+  "domain": "environment-configuration",
+  "owners": [
+    {
+      "kind": "repository",
+      "id": "github:wellmanifest/env-dsl",
+      "responsibilities": [
+        "semantics",
+        "validation",
+        "compatibility",
+        "runtime",
+        "security"
+      ]
+    }
+  ],
+  "source": {
+    "repository": "https://github.com/wellmanifest/env-dsl",
+    "path": "spec/env-dsl.abnf",
+    "declaredVersion": "1",
+    "canonical": "text",
+    "mediaType": "application/vnd.wellmanifest.env-dsl",
+    "selectors": []
+  },
+  "ownedPaths": [
+    "dsl-manifest.json",
+    "spec/**",
+    "examples/**",
+    "tests/**",
+    "docs/**"
+  ],
+  "artifacts": [
+    {
+      "path": "spec/env-dsl.abnf",
+      "role": "normative-source",
+      "digest": "sha256:ece83a4bab3b1e272ef5cafec258d0077c132fe8751afadfe30c4fb84d185780"
+    },
+    {
+      "path": "spec/ENV_DSL.md",
+      "role": "documentation",
+      "digest": "sha256:dca734a43cdb5187712cf871c0f510b592e73628523037844849751362f50afb"
+    },
+    {
+      "path": "tests/env_dsl_check.py",
+      "role": "parser-contract",
+      "digest": "sha256:1c229bf853022fcc4cd9271b04a6af1083f0995ff7301262dd1bada5e476c948"
+    },
+    {
+      "path": "tests/test_env_dsl.py",
+      "role": "parser-contract",
+      "digest": "sha256:d6633661b0daf2a4c8fdb6476373981a22110fbfc1221d5b8177ea16fb9be8da"
+    },
+    {
+      "path": "examples/valid/dsl-check.env",
+      "role": "example",
+      "digest": "sha256:fa6a0d445b86291a03812314522bad4df75b55165674c0818fa3625b1d82bcf3"
+    },
+    {
+      "path": "examples/invalid/nonportable.env",
+      "role": "example",
+      "digest": "sha256:7627489b68756c1a5bb6b76971fe641d2a339e50d6e39dcda4c2b7eafa1ffd19"
+    },
+    {
+      "path": "docs/ARCHITECTURE.md",
+      "role": "documentation",
+      "digest": "sha256:538bd37cd8be5ab7a1168549a8313bfde9016260e64eb3816e8f0ee18fcc0956"
+    },
+    {
+      "path": "docs/LOGIC_FLOW.md",
+      "role": "documentation",
+      "digest": "sha256:3a4957d00ddf8a0a1ae0f69d69d8dabe78dd4a1c043fdccb7c5a6c406e2738e7"
+    },
+    {
+      "path": "docs/ERROR/ENV-SYNTAX-001.md",
+      "role": "documentation",
+      "digest": "sha256:a8e6aead32b1b2ea1b37b0b5f523716a527b83884fa43bc6454a3a58df59b4bd"
+    },
+    {
+      "path": "docs/ERROR/ENV-SEMANTIC-001.md",
+      "role": "documentation",
+      "digest": "sha256:682d09e2d2887f48fe412840b36a918e6d6719b535c63df5b7340abf7d211500"
+    },
+    {
+      "path": "docs/ERROR/ENV-LAYER-001.md",
+      "role": "documentation",
+      "digest": "sha256:40cbe8844468fd19d020b494c433f4b81d9f023effb46efa61e147edd28b75ad"
+    },
+    {
+      "path": "docs/CRITICAL/ENV-SECURITY-001.md",
+      "role": "documentation",
+      "digest": "sha256:e6d34580179b868ed7e868196c3bbc9717a872f2087bfb74536a07879a7c5aad"
+    }
+  ],
+  "namespaces": [
+    {
+      "prefix": "env",
+      "uri": "https://wellmanifest.dev/env/"
+    }
+  ],
+  "projections": [],
+  "lifecycle": {
+    "compatibility": "semver",
+    "stability": "experimental",
+    "breaking": "major",
+    "additive": "minor",
+    "fix": "patch"
+  },
+  "semantics": {
+    "effectModel": "descriptive",
+    "unknownPolicy": "reject",
+    "authoritySchema": null
+  },
+  "llm": {
+    "mode": "none",
+    "requestSchemas": [],
+    "responseSchemas": [],
+    "naturalLanguage": "forbidden",
+    "sourceSchema": null,
+    "modelAuthority": "none",
+    "strict": true
+  },
+  "documentation": {
+    "vocabularyKind": "documents",
+    "commandRoot": "docs",
+    "errorRoot": "docs/ERROR",
+    "criticalRoot": "docs/CRITICAL",
+    "commands": [],
+    "errorCodes": [
+      "ENV-LAYER-001",
+      "ENV-SEMANTIC-001",
+      "ENV-SYNTAX-001"
+    ],
+    "criticalCodes": [
+      "ENV-SECURITY-001"
+    ]
+  },
+  "findingPolicy": {
+    "schema": "wellmanifest.dsl/findings/v1",
+    "requiredProducers": [
+      "wellmanifest.env-dsl-check"
+    ],
+    "securityProducers": [
+      "wellmanifest.env-dsl-check"
+    ],
+    "blockingSeverities": [
+      "critical"
+    ],
+    "requireEvaluable": true,
+    "blockUnresolvedSecurity": true
+  },
+  "publicationPolicy": {
+    "declaredTier": "review",
+    "deterministic": true,
+    "independentReview": true,
+    "externalAuthority": false,
+    "runtimeIsolation": false
+  },
+  "conformance": {
+    "levels": [
+      "manifest",
+      "contract",
+      "runtime"
+    ],
+    "commands": [
+      "python3 tests/env_dsl_check.py validate examples/valid/dsl-check.env",
+      "python3 tests/env_dsl_check.py self-test",
+      "python3 -m unittest discover -s tests -p 'test_*.py'"
+    ],
+    "validExamples": [
+      "examples/valid/dsl-check.env"
+    ],
+    "invalidExamples": [
+      "examples/invalid/nonportable.env"
+    ]
+  },
+  "mappings": [
+    {
+      "standard": "wellmanifest/dsl",
+      "version": "0.1.0-dev",
+      "relation": "implements",
+      "uri": "https://github.com/wellmanifest/dsl"
+    }
+  ],
+  "standardsLock": {
+    "schema": "wellmanifest.standards-lock/v1",
+    "entries": [
+      {
+        "standard": "wellmanifest.dsl",
+        "version": "0.1.0-dev",
+        "repository": "https://github.com/wellmanifest/dsl",
+        "revision": "b7d0595c95e5abbb48ebfdbdae0bc6d43c6f82f4",
+        "contracts": [
+          {
+            "ref": "https://wellmanifest.dev/schemas/dsl-manifest/v1",
+            "digest": "sha256:34d356b76bbd483372df84bb986e15bb84e9c1f8b11b7dc9e3a6c7276c85ed13"
+          }
+        ]
+      }
+    ]
+  }
+}

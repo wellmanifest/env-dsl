@@ -3,7 +3,7 @@
 - **ID**: ticket-001
 - **Owner**: unresolved:human
 - **Status**: IN_PROGRESS
-- **Workflow state**: EDIT
+- **Workflow state**: VALIDATION
 - **Created**: 2026-08-14
 
 ## Goal and scope
@@ -20,24 +20,24 @@ DSL and belong to a consumer adapter.
 
 ## Acceptance criteria
 
-- [ ] AC-01: A normative specification defines the document identity,
+- [x] AC-01: A normative specification defines the document identity,
   `SNAKE_CASE` key grammar, literal value grammar and environment metadata.
-- [ ] AC-02: The language forbids evaluation, interpolation, command
+- [x] AC-02: The language forbids evaluation, interpolation, command
   substitution, host-language constructors and secret material.
-- [ ] AC-03: Environment layering and duplicate/override semantics are
+- [x] AC-03: Environment layering and duplicate/override semantics are
   deterministic and distinguish the selected environment explicitly.
-- [ ] AC-04: A language-neutral ABNF grammar describes every accepted line.
-- [ ] AC-05: A valid `.env`-shaped example represents the scalar constants from
+- [x] AC-04: A language-neutral ABNF grammar describes every accepted line.
+- [x] AC-05: A valid `.env`-shaped example represents the scalar constants from
   `dsl_check.py`, including raw pattern text and no `re.compile(...)` calls.
-- [ ] AC-06: Invalid fixtures cover lowercase keys, duplicate keys,
+- [x] AC-06: Invalid fixtures cover lowercase keys, duplicate keys,
   interpolation, command substitution, language constructors and secret names.
-- [ ] AC-07: A dependency-free checker and tests accept valid documents and
+- [x] AC-07: A dependency-free checker and tests accept valid documents and
   reject invalid fixtures with stable diagnostic codes.
-- [ ] AC-08: A Wellmanifest DSL manifest binds the standard, grammar, examples,
+- [x] AC-08: A Wellmanifest DSL manifest binds the standard, grammar, examples,
   checker and documentation by SHA-256 and pins `wellmanifest/dsl`.
-- [ ] AC-09: Architecture and logic-flow documentation show the neutral DSL
+- [x] AC-09: Architecture and logic-flow documentation show the neutral DSL
   boundary and consumer-owned compilation/type-conversion boundary.
-- [ ] AC-10: Governance, unit, self-test, DSL manifest, link, secret and
+- [x] AC-10: Governance, unit, self-test, DSL manifest, link, secret and
   repository-diff checks pass with recorded evidence.
 
 ## Participants

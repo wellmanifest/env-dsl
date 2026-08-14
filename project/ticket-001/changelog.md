@@ -16,3 +16,9 @@
   keeping checker/conformance code under `tests/**` rather than `src/**`.
 - Created the one local seed baseline and bound the full delivery plan to its
   real commit SHA before adding implementation files.
+- Added the Env DSL 1 normative standard and ABNF grammar for inert,
+  environment-scoped `SNAKE_CASE=value` constants.
+- Added deterministic parsing and layering conformance, stable diagnostic help
+  pages, valid/invalid fixtures and seven dependency-free unit tests.
+- Added digest-bound Wellmanifest DSL metadata and architecture/logic-flow
+  documentation defining the consumer-owned compilation boundary.
