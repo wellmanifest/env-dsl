@@ -46,11 +46,11 @@
   "delivery": {
     "acceptedBaseSha": "d8ffe2c706bd06952311029571ecef8b1787b2a0",
     "targetBranch": "main",
-    "outcome": "Define Env DSL v1 as a portable inert SNAKE_CASE constants standard with deterministic conformance and Wellmanifest DSL metadata",
+    "outcome": "Define Env DSL v1 as a portable inert SNAKE_CASE constants, expressions and conditions standard with deterministic conformance and Wellmanifest DSL metadata",
     "nonGoals": [
       "Do not edit wellmanifest/dsl/src/dsl_check.py in this repository",
       "Do not define or transport secrets",
-      "Do not execute, source, evaluate or interpolate Env DSL documents",
+      "Do not source documents, invoke host-language eval, interpolate process state or perform effects; expression evaluation is limited to the deterministic Env DSL operator semantics",
       "Do not implement language-specific loaders, regex compilers, a CLI or a daemon",
       "Do not create a remote repository, push, merge, tag or publish this target in the seed transaction"
     ],
@@ -64,7 +64,7 @@
     },
     "architecture": {
       "status": "accepted",
-      "decision": "Use a strict dotenv-shaped data language, a language-neutral ABNF grammar and a dependency-free conformance checker; all evaluation and type conversion belong to consumer adapters",
+      "decision": "Use a strict dotenv-shaped data language, a language-neutral ABNF grammar and a dependency-free conformance checker; suffix-typed equations are parsed and evaluated by deterministic Env DSL semantics while host conversion and effects remain consumer-owned",
       "components": [
         {
           "name": "normative-language",
@@ -89,13 +89,14 @@
       ],
       "responsibilityChanges": true,
       "interfaceChanges": [
-        "Publish the Env DSL v1 document syntax and layering semantics",
+        "Publish the Env DSL v1 document, layering, expression and condition semantics",
         "Publish stable ENV-* conformance diagnostic codes",
         "Publish a digest-bound wellmanifest.dsl manifest"
       ],
       "dataChanges": [
         "Represent environment constants as inert SNAKE_CASE=value records",
-        "Represent regular expressions as literal pattern text without host-language constructors"
+        "Represent regular expressions as literal pattern text without host-language constructors",
+        "Represent derived scalar equations as *_EXPRESSION and boolean equations as *_CONDITION using explicit @SNAKE_CASE references"
       ],
       "ui": {
         "impact": "none",
@@ -129,6 +130,13 @@
         "commands": [
           "./project/governance-check.sh --actor agent",
           "git diff --check"
+        ],
+        "evidence": "project/ticket-001/ai-codex-logs.txt"
+      },
+      {
+        "criterion": "AC-11",
+        "commands": [
+          "python3 tests/env_dsl_check.py evaluate examples/valid/dsl-check.env"
         ],
         "evidence": "project/ticket-001/ai-codex-logs.txt"
       }

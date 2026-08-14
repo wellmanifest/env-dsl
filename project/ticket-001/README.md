@@ -3,7 +3,7 @@
 - **ID**: ticket-001
 - **Owner**: unresolved:human
 - **Status**: IN_PROGRESS
-- **Workflow state**: VALIDATION
+- **Workflow state**: EDIT
 - **Created**: 2026-08-14
 
 ## Goal and scope
@@ -12,6 +12,8 @@ Create the first usable Wellmanifest Env DSL standard for portable environment
 constants. The canonical text format is a strict `SNAKE_CASE=value` subset
 that keeps values as data and can be projected into `.env`, Docker, Make,
 shell, Go, Elixir, Erlang, Ruby, Python and other runtimes through adapters.
+Names ending in `_EXPRESSION` and `_CONDITION` additionally carry portable,
+suffix-typed equations whose operators have language-neutral semantics.
 
 The reference example extracts constants such as schema identifiers and raw
 regular-expression patterns from `wellmanifest/dsl/src/dsl_check.py`. It stores
@@ -39,6 +41,9 @@ DSL and belong to a consumer adapter.
   boundary and consumer-owned compilation/type-conversion boundary.
 - [x] AC-10: Governance, unit, self-test, DSL manifest, link, secret and
   repository-diff checks pass with recorded evidence.
+- [ ] AC-11: Portable scalar expressions and boolean conditions use explicit
+  `@SNAKE_CASE` references, normative precedence and deterministic evaluation
+  without host-language `eval` or ambient environment access.
 
 ## Participants
 
@@ -49,7 +54,8 @@ DSL and belong to a consumer adapter.
 
 - Editing `wellmanifest/dsl/src/dsl_check.py` from this repository ticket.
 - Defining secrets, credentials or deployment-specific secret transport.
-- Executing, sourcing or evaluating an Env DSL document.
+- Sourcing documents, invoking host-language `eval` or using an expression to
+  authorize effects; the reference evaluator computes descriptive values only.
 - Standardizing the public API of every language-specific environment loader.
 - Hosting a CLI, daemon or runtime service in Wellmanifest.
 

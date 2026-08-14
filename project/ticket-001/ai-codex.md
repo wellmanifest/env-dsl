@@ -40,6 +40,8 @@ request, merge, tag or release.
 5. Add a Wellmanifest DSL adoption manifest with immutable artifact digests.
 6. Document adapter ownership and data flow with Mermaid diagrams.
 7. Run governance, unit, self-test, manifest, link, secret and diff checks.
+8. Define and validate portable `*_EXPRESSION` and `*_CONDITION` equations
+   after the user's explicit scope expansion.
 
 ## Actual changes
 
@@ -95,6 +97,6 @@ request, merge, tag or release.
 - `src/**` was removed from the allowlist after the seed gate correctly routed
   it to the `application` workstream; conformance code stays under `tests/**`.
 - The implementation is complete on `ticket/001-env-dsl-standard` within the
-  recorded L budget: 13 implementation files, 5 components, 3 interfaces and
-  0 runtime dependencies. The ticket is in local validation pending any future
-  publication decision.
+  recorded L budget. The user then explicitly expanded the same unpublished
+  workstream to cover operator equations and conditions; ticket-001 returned
+  to `EDIT` and retains the same bounded paths and dependency budget.

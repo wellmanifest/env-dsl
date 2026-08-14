@@ -226,3 +226,10 @@ ENV_VALID_EXAMPLE=PASS
 ENV_SELF_TEST=PASS
 UNIT_TESTS=PASS:7
 WORKTREE_DIFF_CHECK=PASS
+
+2026-08-14 expression scope extension
+USER_REQUEST="organize constants and conditions as operators within equations; implement if absent"
+SESSION_EXECUTION_AUTHORIZATION=EXPANDED
+TICKET_REUSED=ticket-001
+WORKFLOW_STATE=IN_PROGRESS/EDIT
+BOUNDARY="suffix-typed inert equations; deterministic semantics; no host eval or effects"
