@@ -72,5 +72,7 @@ ticket scope.
 - Seed baseline: `main@d8ffe2c706bd06952311029571ecef8b1787b2a0`.
 - Complexity: L; at most 15 implementation files, 5 affected components, 3
   public-interface changes and 0 runtime dependencies.
-- Implementation branch: `ticket/001-env-dsl-standard`; remote publication is
-  not part of the seed authorization.
+- Implementation branch: `ticket/001-env-dsl-standard`. Seed authorization did
+  not include a remote. The founder continuation (`kontynuuj`) authorized
+  creating origin if missing and pushing this ticket branch; no pull request
+  and no merge to `main`.

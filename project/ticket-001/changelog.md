@@ -26,3 +26,5 @@
   references, scalar typing, operator precedence and effect-free evaluation.
 - Added stable `ENV-EXPRESSION-001` diagnostics plus deterministic checks for
   missing references, cycles, type errors, division and post-layer resolution.
+- Founder continuation authorized origin creation (if missing) and push of
+  `ticket/001-env-dsl-standard` without a pull request.

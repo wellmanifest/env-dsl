@@ -88,9 +88,10 @@ request, merge, tag or release.
 
 ## Blockers
 
-- None for the requested local repository and specification. Remote creation
-  and publication remain a separate external action requiring an explicit
-  repository visibility and delivery decision.
+- None for local conformance. The founder continuation (`kontynuuj`) authorized
+  creating the GitHub origin (if missing, matching wellmanifest org siblings)
+  and pushing `ticket/001-env-dsl-standard`. No pull request. Merge to `main`
+  still waits for independent review.
 
 ## Resume state
 
@@ -104,4 +105,5 @@ request, merge, tag or release.
 - The expanded implementation is complete on
   `ticket/001-env-dsl-standard` within the recorded L budget: 14
   implementation files, 5 components, 3 interfaces and 0 runtime dependencies.
-  The ticket returned to local validation pending any publication decision.
+- Founder session authorization covers remote create and push of this ticket
+  branch only. Placement remains `home=wellmanifest`, `shape=domain_pack`.
