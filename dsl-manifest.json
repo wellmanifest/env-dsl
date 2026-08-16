@@ -64,7 +64,7 @@
     {
       "path": "examples/valid/subllm-credential-strategies.env",
       "role": "example",
-      "digest": "sha256:d2083bf0a907c15f60569cf66af9c513c05a028612a608d9d75485aa7b3780e2"
+      "digest": "sha256:b2b88dd064ae5c444ce16e9bd97e610b58c9b7df4d59ba4bc0cffd30082540e0"
     },
     {
       "path": "examples/invalid/nonportable.env",

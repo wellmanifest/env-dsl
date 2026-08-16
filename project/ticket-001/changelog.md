@@ -28,3 +28,8 @@
   missing references, cycles, type errors, division and post-layer resolution.
 - Founder continuation authorized origin creation (if missing) and push of
   `ticket/001-env-dsl-standard` without a pull request.
+
+## [0.1.1] - 2026-08-16
+
+- Odświeżono digest `examples/valid/subllm-credential-strategies.env` w
+  `dsl-manifest.json`, żeby `dsl_check validate` znowu przechodził.
