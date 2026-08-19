@@ -29,6 +29,15 @@
 - Founder continuation authorized origin creation (if missing) and push of
   `ticket/001-env-dsl-standard` without a pull request.
 
+## [0.2.0] - 2026-08-19
+
+- Closed ticket-001 (`DONE / DONE`) from integrated `main` after
+  `ecf7ae8` (direct fast-forward of `ticket/001-env-dsl-standard`).
+- Post-merge evidence: Env DSL 1 grammar, conformance and adapters are on
+  the default branch. No implementation files in this closure.
+- The ticket stayed `IN_PROGRESS` / `VALIDATION` on `main` after the
+  merge.
+
 ## [0.1.1] - 2026-08-16
 
 - Odświeżono digest `examples/valid/subllm-credential-strategies.env` w
