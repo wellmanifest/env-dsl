@@ -2,8 +2,8 @@
 
 - **ID**: ticket-002
 - **Owner**: agent:gemini under SESSION_EXECUTION_AUTHORIZATION
-- **Status**: IN_PROGRESS
-- **Workflow state**: EDIT
+- **Status**: DONE
+- **Workflow state**: DONE
 - **Created**: 2026-08-23
 
 ## Goal and scope
@@ -13,9 +13,15 @@ Brings the host-agnostic contract (CLAUDE.md, GEMINI.md, Cursor rule, pre-commit
 
 ## Acceptance criteria
 
-- [ ] AC-01: `python3 .governance/agent_host_check.py --root .` → `GOV-AGENT-HOST-PASS` after `./scripts/install-agent-hosts.sh`.
-- [ ] AC-02: `./project/governance-check.sh --actor agent` → `GOV-PASS`, all managed digests match lock.
-- [ ] AC-03: `python3 -m unittest discover -s tests -v` passes; domain contracts unaffected.
+- [x] AC-01: `python3 .governance/agent_host_check.py --root .` → `GOV-AGENT-HOST-PASS` after `./scripts/install-agent-hosts.sh`.
+- [x] AC-02: `./project/governance-check.sh --actor agent` → `GOV-PASS`, all managed digests match lock.
+- [x] AC-03: `python3 -m unittest discover -s tests -v` passes; domain contracts unaffected.
+
+## Publication evidence
+
+- Pull request: `wellmanifest/env-dsl#1`
+- Frozen and approved head: `d6f584e736090f5c95066233df64aaac33563481`
+- Merge commit: `70e6662b04cce0702e20d6e48b86256ebc39c903`
 
 ## Participants
 
