@@ -132,6 +132,7 @@
     "responseSchemas": [],
     "naturalLanguage": "forbidden",
     "sourceSchema": null,
+    "decisionProtocol": "none",
     "modelAuthority": "none",
     "strict": true
   },
