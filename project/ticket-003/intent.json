@@ -1,0 +1,83 @@
+{
+  "schema": "new-project.intent/v3",
+  "ticket": "ticket-003",
+  "summary": "Declare DSL manifest decision protocol for wellmanifest/dsl gate",
+  "workstream": "integration",
+  "classification": {
+    "kind": "BUG",
+    "priority": "P2",
+    "origin": "requested"
+  },
+  "allowedPaths": [
+    "project/ticket-003/**",
+    "project/TICKETS.md",
+    "dsl-manifest.json"
+  ],
+  "forbiddenPaths": [
+    "project/ticket-*/user-*.md",
+    ".governance/**"
+  ],
+  "stacks": [],
+  "dependsOn": [],
+  "conflictsWith": [],
+  "integrationTicket": null,
+  "placement": {
+    "home": "wellmanifest",
+    "shape": "domain_pack",
+    "runtimeOwner": "wellmanifest",
+    "adopt": [
+      "wellmanifest/dsl"
+    ]
+  },
+  "delivery": {
+    "acceptedBaseSha": "b851fdc3c694115c9e38fbcc82bf1bb16dd608ab",
+    "targetBranch": "main",
+    "outcome": "dsl-manifest.json declares llm.decisionProtocol=none and passes the current wellmanifest/dsl gate.",
+    "nonGoals": [
+      "No DSL syntax, semantics, runtime or test change",
+      "No LLM enablement or authority change",
+      "No manifest version change"
+    ],
+    "complexity": "S",
+    "estimatedMinutes": 10,
+    "budgets": {
+      "maxImplementationFiles": 1,
+      "maxAffectedComponents": 1,
+      "maxPublicInterfaceChanges": 1,
+      "maxRuntimeDependencies": 0
+    },
+    "architecture": {
+      "status": "accepted",
+      "decision": "Add the single field required by wellmanifest/dsl for llm.mode=none; leave every other manifest value unchanged.",
+      "components": [
+        {
+          "name": "dsl-manifest",
+          "paths": [
+            "dsl-manifest.json"
+          ]
+        }
+      ],
+      "responsibilityChanges": false,
+      "interfaceChanges": [
+        "dsl-manifest.json declares llm.decisionProtocol=none"
+      ],
+      "dataChanges": [],
+      "ui": {
+        "impact": "none",
+        "states": [],
+        "evidence": []
+      },
+      "rollback": "Remove llm.decisionProtocol from dsl-manifest.json."
+    },
+    "runtimeDependencies": [],
+    "validation": [
+      {
+        "criterion": "AC-01",
+        "commands": [
+          "python3 <wellmanifest/dsl@5f40ad5>/src/dsl_check.py validate --root . dsl-manifest.json"
+        ],
+        "evidence": "DSL-PASS: passed (0 errors)."
+      }
+    ]
+  }
+}
