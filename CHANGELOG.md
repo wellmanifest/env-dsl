@@ -9,3 +9,4 @@
   standard.
 - Reserved the initial `0.1.0-dev` surface for portable `SNAKE_CASE`
   constants, literal values, environment overlays and adapter boundaries.
+- Reconciled closed ticket records and clean governance status for tickets 003 and 004.

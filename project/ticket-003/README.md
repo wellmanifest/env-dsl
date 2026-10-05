@@ -2,8 +2,8 @@
 
 - **ID**: ticket-003
 - **Owner**: unresolved:human
-- **Status**: IN_PROGRESS
-- **Workflow state**: VALIDATION
+- **Status**: DONE
+- **Workflow state**: DONE
 - **Session execution authorization**: user requested correcting wellmanifest standards that fail their own DSL conformance gate (2026-09-13)
 - **Created**: 2026-09-13
 
@@ -24,7 +24,7 @@ that value and changes nothing else.
 ## Acceptance criteria
 
 - [x] AC-01: the wellmanifest/dsl gate reports `DSL-PASS: passed (0 errors)`.
-- [ ] AC-02: `./project/governance-check.sh` passes on the published head.
+- [x] AC-02: `./project/governance-check.sh` passes on the published head.
 
 ## Participants
 
