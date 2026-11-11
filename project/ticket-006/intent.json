@@ -1,0 +1,90 @@
+{
+  "schema": "new-project.intent/v3",
+  "ticket": "ticket-006",
+  "summary": "Enforce ABNF string-atom charset, expression depth bound, and pytest integration",
+  "workstream": "integration",
+  "classification": {
+    "kind": "BUG",
+    "priority": "P1",
+    "origin": "health"
+  },
+  "allowedPaths": [
+    "project/ticket-006/**",
+    "TODO.md",
+    "project/TICKETS.md",
+    "dsl-manifest.json",
+    "pyproject.toml",
+    "tests/env_dsl_check.py",
+    "tests/test_env_dsl.py"
+  ],
+  "forbiddenPaths": [
+    "project/ticket-*/user-*.md"
+  ],
+  "stacks": [],
+  "dependsOn": [],
+  "conflictsWith": [],
+  "integrationTicket": null,
+  "delivery": {
+    "acceptedBaseSha": "a056ea2937f782e4ee885ccbb021703cae4034c6",
+    "targetBranch": "main",
+    "outcome": "Align Env DSL string-atom lexing with spec/env-dsl.abnf, bound expression parser recursion depth, tighten shell interpolation and secret token guards, wire standalone pytest in pyproject.toml, and synchronize dsl-manifest.json digests.",
+    "nonGoals": [
+      "Do not modify spec/env-dsl.abnf or spec/ENV_DSL.md wire specifications",
+      "Do not add runtime dependencies",
+      "Do not modify managed .governance files"
+    ],
+    "complexity": "S",
+    "estimatedMinutes": 20,
+    "budgets": {
+      "maxImplementationFiles": 4,
+      "maxAffectedComponents": 2,
+      "maxPublicInterfaceChanges": 1,
+      "maxRuntimeDependencies": 0
+    },
+    "architecture": {
+      "status": "accepted",
+      "decision": "Enforce exact RFC 5234 atom-char codepoint ranges and MAX_EXPRESSION_DEPTH in tests/env_dsl_check.py, expand shell/secret heuristics, add pythonpath/testpaths to pyproject.toml, and refresh dsl-manifest.json SHA-256 digests.",
+      "components": [
+        {
+          "name": "env-dsl-validator-and-tests",
+          "paths": [
+            "tests/env_dsl_check.py",
+            "tests/test_env_dsl.py",
+            "pyproject.toml"
+          ]
+        },
+        {
+          "name": "dsl-manifest-binding",
+          "paths": [
+            "dsl-manifest.json"
+          ]
+        }
+      ],
+      "responsibilityChanges": false,
+      "interfaceChanges": [
+        "Update dsl-manifest.json parser-contract SHA-256 digests"
+      ],
+      "dataChanges": [],
+      "ui": {
+        "impact": "none",
+        "states": [],
+        "evidence": []
+      },
+      "rollback": "Revert the ticket commit on main to restore prior checker and manifest digests."
+    },
+    "runtimeDependencies": [],
+    "validation": [
+      {
+        "criterion": "AC-01",
+        "commands": [
+          "python3 tests/env_dsl_check.py self-test",
+          "python3 tests/env_dsl_check.py validate examples/valid/dsl-check.env examples/valid/subllm-credential-strategies.env",
+          "python3 -m unittest discover -s tests -p 'test_*.py'",
+          "pytest -q",
+          "./project/governance-check.sh --base origin/main"
+        ],
+        "evidence": "Self-test, example conformance, unit tests, dsl-manifest check, pytest, governance gate, and wellman check pass."
+      }
+    ]
+  }
+}

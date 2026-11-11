@@ -187,6 +187,36 @@ class EnvDslTests(unittest.TestCase):
         self.assertTrue(any(item.code == SYNTAX for item in diagnostics))
         self.assertTrue(any(item.code == SEMANTIC for item in diagnostics))
 
+    def test_string_atom_enforces_abnf_charset_and_depth_bound(self) -> None:
+        for invalid_atom in (":hello world", ':"quoted"', ":back`tick"):
+            _, diagnostics = evaluate_constants({"BAD_CONDITION": f"{invalid_atom}==:ok"})
+            self.assertTrue(any(item.code == EXPRESSION for item in diagnostics), invalid_atom)
+
+        deep = "(" * 80 + "1" + ")" * 80
+        _, depth_diagnostics = evaluate_constants({"DEEP_EXPRESSION": deep})
+        self.assertTrue(any("maximum depth" in item.message for item in depth_diagnostics))
+
+        deep_unary = "!" * 80 + "TRUE"
+        _, unary_diagnostics = evaluate_constants({"UNARY_CONDITION": deep_unary})
+        self.assertTrue(any("maximum depth" in item.message for item in unary_diagnostics))
+
+    def test_positional_shell_interpolation_and_extended_secrets_rejected(self) -> None:
+        for shell_val in ("arg=$1", "pid=$$", "all=$@"):
+            text = (
+                "ENV_DSL_VERSION=1\nENV_DSL_NAMESPACE=SHELL\n"
+                f"ENV_DSL_ENVIRONMENT=BASE\nARG_VALUE={shell_val}\n"
+            )
+            _, diagnostics = parse_text(text)
+            self.assertTrue(any(item.code == SEMANTIC for item in diagnostics), shell_val)
+
+        for tok in ("ASIA1234567890ABCDEF", "glpat-abcdef123456", "xoxb-12345-abcdef"):
+            text = (
+                "ENV_DSL_VERSION=1\nENV_DSL_NAMESPACE=SEC\n"
+                f"ENV_DSL_ENVIRONMENT=BASE\nPUBLIC_VALUE={tok}\n"
+            )
+            _, diagnostics = parse_text(text)
+            self.assertTrue(any(item.code == SECURITY for item in diagnostics), tok)
+
 
 if __name__ == "__main__":
     unittest.main()

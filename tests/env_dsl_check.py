@@ -117,6 +117,20 @@ PRECEDENCE = {
 MULTI_OPERATORS = ("&&", "||", "==", "!=", "<=", ">=")
 SINGLE_OPERATORS = frozenset("+-*/%!<>")
 STRING_DELIMITERS = frozenset("&|=!<>()+-*/%")
+MAX_EXPRESSION_DEPTH = 64
+
+
+def is_atom_char(char: str) -> bool:
+    code = ord(char)
+    return (
+        0x23 <= code <= 0x24
+        or code == 0x2C
+        or code == 0x2E
+        or 0x30 <= code <= 0x3B
+        or 0x3F <= code <= 0x5F
+        or 0x61 <= code <= 0x7B
+        or 0x7D <= code <= 0x7E
+    )
 
 
 def is_name(value: str) -> bool:
@@ -166,11 +180,15 @@ def tokenize_expression(source: str) -> list[Token]:
             continue
         if char == ":":
             end = index + 1
-            while end < len(source) and source[end] not in STRING_DELIMITERS:
+            while end < len(source) and is_atom_char(source[end]):
                 end += 1
             value = source[index + 1:end]
             if not value:
                 raise ExpressionError(f"empty string atom at column {position}")
+            if end < len(source) and source[end] not in STRING_DELIMITERS:
+                raise ExpressionError(
+                    f"invalid string-atom character {source[end]!r} at column {end + 1}"
+                )
             tokens.append(Token("STRING", value, position))
             index = end
             continue
@@ -203,6 +221,7 @@ class ExpressionParser:
     def __init__(self, source: str) -> None:
         self.tokens = tokenize_expression(source)
         self.index = 0
+        self.depth = 0
 
     @property
     def current(self) -> Token:
@@ -232,8 +251,16 @@ class ExpressionParser:
 
     def parse_unary(self) -> ExpressionNode:
         if self.current.kind == "OP" and self.current.value in {"!", "-"}:
-            operator = self.take()
-            return ExpressionNode("unary", operator.value, self.parse_unary())
+            self.depth += 1
+            if self.depth > MAX_EXPRESSION_DEPTH:
+                raise ExpressionError(
+                    f"expression nesting exceeds maximum depth {MAX_EXPRESSION_DEPTH}"
+                )
+            try:
+                operator = self.take()
+                return ExpressionNode("unary", operator.value, self.parse_unary())
+            finally:
+                self.depth -= 1
         return self.parse_primary()
 
     def parse_primary(self) -> ExpressionNode:
@@ -247,11 +274,19 @@ class ExpressionParser:
         if lexeme.kind == "BOOL":
             return ExpressionNode("literal", lexeme.value == "TRUE")
         if lexeme.kind == "LPAREN":
-            node = self.parse_binary(1)
-            if self.current.kind != "RPAREN":
-                raise ExpressionError(f"missing closing parenthesis at column {lexeme.position}")
-            self.take()
-            return node
+            self.depth += 1
+            if self.depth > MAX_EXPRESSION_DEPTH:
+                raise ExpressionError(
+                    f"expression nesting exceeds maximum depth {MAX_EXPRESSION_DEPTH}"
+                )
+            try:
+                node = self.parse_binary(1)
+                if self.current.kind != "RPAREN":
+                    raise ExpressionError(f"missing closing parenthesis at column {lexeme.position}")
+                self.take()
+                return node
+            finally:
+                self.depth -= 1
         raise ExpressionError(f"expected operand at column {lexeme.position}")
 
 
@@ -264,7 +299,12 @@ def has_interpolation(value: str) -> bool:
         if char != "$":
             continue
         following = value[index + 1]
-        if following in "({" or following == "_" or following.isalpha():
+        if (
+            following in "({$@"
+            or following == "_"
+            or following.isalpha()
+            or following.isdigit()
+        ):
             return True
     return False
 
@@ -275,11 +315,11 @@ def secret_name(name: str) -> bool:
 
 def secret_value(value: str) -> bool:
     lowered = value.lower()
-    if "private-key" in lowered or "private_key" in lowered:
+    if "private-key" in lowered or "private_key" in lowered or "-----begin" in lowered:
         return True
-    if lowered.startswith(("ghp_", "github_pat_", "sk-")):
+    if lowered.startswith(("ghp_", "github_pat_", "glpat-", "sk-", "xoxb-", "xoxp-", "npm_")):
         return True
-    return value.startswith("AKIA") and len(value) >= 16
+    return value.startswith(("AKIA", "ASIA")) and len(value) >= 16
 
 
 def value_problem(value: str) -> str | None:

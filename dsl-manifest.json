@@ -49,12 +49,12 @@
     {
       "path": "tests/env_dsl_check.py",
       "role": "parser-contract",
-      "digest": "sha256:5bf2e2b0983f9bbe421278a2eb76f485a5fee4c10cd820a19bfd5d1ac6e2dc24"
+      "digest": "sha256:47c3d58bf65b5a3fd7c3511ca9fa9276f606fd9bed106a0dd0b143a234858282"
     },
     {
       "path": "tests/test_env_dsl.py",
       "role": "parser-contract",
-      "digest": "sha256:3f504ab8a4630e784aa92bed66003e68556b62a980989139e84ed9324b7612a5"
+      "digest": "sha256:bedbf3ced7cc38d822c85b5cb31569d836add1cb8e3db32bc77f69134f90bc57"
     },
     {
       "path": "examples/valid/dsl-check.env",
