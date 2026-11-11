@@ -1,0 +1,96 @@
+{
+  "schema": "new-project.intent/v3",
+  "ticket": "ticket-007",
+  "summary": "Modularize env_dsl_check under 500 lines and harden recursion, integer bounds, and file I/O",
+  "workstream": "integration",
+  "classification": {
+    "kind": "BUG",
+    "priority": "P2",
+    "origin": "health"
+  },
+  "allowedPaths": [
+    "project/ticket-007/**",
+    "TODO.md",
+    "project/TICKETS.md",
+    "dsl-manifest.json",
+    "tests/env_dsl_check.py",
+    "tests/env_dsl_expr.py",
+    "tests/test_env_dsl.py"
+  ],
+  "forbiddenPaths": [
+    "project/ticket-*/user-*.md"
+  ],
+  "stacks": [],
+  "dependsOn": [],
+  "conflictsWith": [],
+  "integrationTicket": null,
+  "delivery": {
+    "acceptedBaseSha": "c167d2029e77f2791f3e31c7846cd52ae7fa22d4",
+    "targetBranch": "main",
+    "outcome": "Split tests/env_dsl_check.py (813 lines) under 500 lines with tests/env_dsl_expr.py, replace recursive reference/cycle/evaluation walks with iterative topological evaluation, bound integer digits/bits and O_NOFOLLOW file reads, and synchronize dsl-manifest.json digests.",
+    "nonGoals": [
+      "Do not modify spec/env-dsl.abnf or spec/ENV_DSL.md wire specifications",
+      "Do not add runtime dependencies"
+    ],
+    "complexity": "S",
+    "estimatedMinutes": 20,
+    "budgets": {
+      "maxImplementationFiles": 4,
+      "maxAffectedComponents": 2,
+      "maxPublicInterfaceChanges": 1,
+      "maxRuntimeDependencies": 0
+    },
+    "architecture": {
+      "status": "accepted",
+      "decision": "Extract bounded expression lexing, parsing, iterative DAG/cycle analysis, and 256-bit arithmetic evaluation into tests/env_dsl_expr.py while keeping document validation, O_NOFOLLOW file loading, and public re-exports in tests/env_dsl_check.py and updating dsl-manifest.json.",
+      "components": [
+        {
+          "name": "env-dsl-validator-and-tests",
+          "paths": [
+            "tests/env_dsl_check.py",
+            "tests/env_dsl_expr.py",
+            "tests/test_env_dsl.py"
+          ]
+        },
+        {
+          "name": "dsl-manifest-binding",
+          "paths": [
+            "dsl-manifest.json"
+          ]
+        }
+      ],
+      "responsibilityChanges": false,
+      "interfaceChanges": [
+        "Update dsl-manifest.json parser-contract SHA-256 digests"
+      ],
+      "dataChanges": [],
+      "ui": {
+        "impact": "none",
+        "states": [],
+        "evidence": []
+      },
+      "rollback": "Revert this bounded commit via protected PR delivery."
+    },
+    "runtimeDependencies": [],
+    "validation": [
+      {
+        "criterion": "AC-02",
+        "commands": [
+          "python3 -m unittest discover -s tests -p 'test_*.py' -v",
+          "python3 tests/env_dsl_check.py self-test"
+        ],
+        "evidence": "project/ticket-007/README.md"
+      },
+      {
+        "criterion": "AC-03",
+        "commands": [
+          "python3 tests/env_dsl_check.py validate examples/valid/dsl-check.env examples/valid/subllm-credential-strategies.env",
+          "python3 ../dsl/src/dsl_check.py validate dsl-manifest.json",
+          "./project/governance-check.sh --actor ci --base c167d2029e77f2791f3e31c7846cd52ae7fa22d4 --head HEAD",
+          "wellman check"
+        ],
+        "evidence": "project/ticket-007/README.md"
+      }
+    ]
+  }
+}

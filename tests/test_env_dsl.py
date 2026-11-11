@@ -1,5 +1,6 @@
-from pathlib import Path
+import tempfile
 import unittest
+from pathlib import Path
 
 from env_dsl_check import (
     EXPRESSION,
@@ -12,7 +13,6 @@ from env_dsl_check import (
     parse_file,
     parse_text,
 )
-
 
 ROOT = Path(__file__).resolve().parents[1]
 VALID = ROOT / "examples" / "valid" / "dsl-check.env"
@@ -216,6 +216,44 @@ class EnvDslTests(unittest.TestCase):
             )
             _, diagnostics = parse_text(text)
             self.assertTrue(any(item.code == SECURITY for item in diagnostics), tok)
+
+    def test_module_line_budgets_symlinks_deep_chains_and_integer_bounds(self) -> None:
+        for mod_name in ("env_dsl_check.py", "env_dsl_expr.py", "test_env_dsl.py"):
+            lines = len((ROOT / "tests" / mod_name).read_text(encoding="utf-8").splitlines())
+            self.assertLess(lines, 500, f"{mod_name} has {lines} lines")
+
+        with tempfile.TemporaryDirectory() as directory:
+            link_path = Path(directory) / "symlink.env"
+            link_path.symlink_to(VALID)
+            doc, link_diags = parse_file(link_path)
+            self.assertIsNone(doc)
+            self.assertEqual([SYNTAX], [item.code for item in link_diags])
+
+        chain: dict[str, str] = {"STEP_0": "1"}
+        for idx in range(1, 1200):
+            chain[f"STEP_{idx}_EXPRESSION"] = (
+                "@STEP_0+1" if idx == 1 else f"@STEP_{idx - 1}_EXPRESSION+1"
+            )
+        evaluated, chain_diags = evaluate_constants(chain)
+        self.assertEqual([], chain_diags)
+        self.assertEqual(1200, evaluated["STEP_1199_EXPRESSION"])
+
+        many_ops = "1+" * 600 + "1"
+        _, op_diags = evaluate_constants({"MANY_EXPRESSION": many_ops})
+        self.assertTrue(any("maximum operator count" in item.message for item in op_diags))
+
+        huge_int = "1" + "0" * 5000
+        _, int_diags = evaluate_constants({"HUGE_EXPRESSION": huge_int})
+        self.assertTrue(any(item.code == EXPRESSION for item in int_diags))
+
+        _, const_diags = evaluate_constants({"HUGE_CONST": huge_int, "USE_EXPRESSION": "@HUGE_CONST+1"})
+        self.assertTrue(any(item.code == EXPRESSION for item in const_diags))
+
+        big_factor = str(10**40)
+        _, overflow_diags = evaluate_constants(
+            {"A": big_factor, "OVF_EXPRESSION": "@A*@A*@A"}
+        )
+        self.assertTrue(any("overflow" in item.message for item in overflow_diags))
 
 
 if __name__ == "__main__":
