@@ -6,14 +6,13 @@ from __future__ import annotations
 import argparse
 import sys
 from collections.abc import Iterable, Sequence
-from dataclasses import dataclass
 from pathlib import Path
 
 _TESTS_DIR = str(Path(__file__).resolve().parent)
 if _TESTS_DIR not in sys.path:
     sys.path.insert(0, _TESTS_DIR)
 
-from env_dsl_expr import (  # noqa: E402
+from env_dsl_expr import (
     ExpressionError,
     ExpressionNode,
     ExpressionParser,
@@ -28,261 +27,281 @@ from env_dsl_expr import (  # noqa: E402
     is_equation,
     is_name,
     parse_expression,
-    read_regular_bytes,
     render_scalar,
     require_type,
     scalar_type,
     tokenize_expression,
 )
+from env_dsl_io import (
+    ENVIRONMENT,
+    EXPRESSION,
+    EXTENDS,
+    HOST_CALL_MARKERS,
+    LAYER,
+    NAMESPACE,
+    REQUIRED_HEADERS,
+    RESERVED_HEADERS,
+    SECRET_NAMES,
+    SECRET_SUFFIXES,
+    SECURITY,
+    SEMANTIC,
+    SYNTAX,
+    VERSION,
+    Diagnostic,
+    Document,
+    Record,
+    has_interpolation,
+    merge_documents,
+    read_regular_bytes,
+    sanitize_diagnostic_text,
+    secret_name,
+    secret_value,
+    value_problem,
+)
 
 __all__ = [
-    "Diagnostic", "Document", "ENVIRONMENT", "EXPRESSION", "EXTENDS",
-    "ExpressionError", "ExpressionNode", "ExpressionParser", "LAYER",
-    "NAMESPACE", "Record", "SECURITY", "SEMANTIC", "SYNTAX", "Scalar",
-    "Token", "VERSION", "coerce_constant", "dependency_cycle",
-    "evaluate_constants", "evaluate_node", "expression_references",
-    "is_atom_char", "is_equation", "is_name", "main", "merge_documents",
-    "parse_expression", "parse_file", "parse_text", "render_scalar",
-    "require_type", "scalar_type", "tokenize_expression",
+    "ENVIRONMENT",
+    "EXPRESSION",
+    "EXTENDS",
+    "HOST_CALL_MARKERS",
+    "LAYER",
+    "NAMESPACE",
+    "SECRET_NAMES",
+    "SECRET_SUFFIXES",
+    "SECURITY",
+    "SEMANTIC",
+    "SYNTAX",
+    "VERSION",
+    "Diagnostic",
+    "Document",
+    "ExpressionError",
+    "ExpressionNode",
+    "ExpressionParser",
+    "Record",
+    "Scalar",
+    "Token",
+    "coerce_constant",
+    "dependency_cycle",
+    "evaluate_constants",
+    "evaluate_node",
+    "expression_references",
+    "has_interpolation",
+    "is_atom_char",
+    "is_equation",
+    "is_name",
+    "main",
+    "merge_documents",
+    "parse_expression",
+    "parse_file",
+    "parse_text",
+    "read_regular_bytes",
+    "render_scalar",
+    "require_type",
+    "scalar_type",
+    "secret_name",
+    "secret_value",
+    "tokenize_expression",
+    "value_problem",
 ]
 
 
-SYNTAX = "ENV-SYNTAX-001"
-SEMANTIC = "ENV-SEMANTIC-001"
-LAYER = "ENV-LAYER-001"
-EXPRESSION = "ENV-EXPRESSION-001"
-SECURITY = "ENV-SECURITY-001"
-
-VERSION = "ENV_DSL_VERSION"
-NAMESPACE = "ENV_DSL_NAMESPACE"
-ENVIRONMENT = "ENV_DSL_ENVIRONMENT"
-EXTENDS = "ENV_DSL_EXTENDS"
-REQUIRED_HEADERS = (VERSION, NAMESPACE, ENVIRONMENT)
-RESERVED_HEADERS = frozenset((*REQUIRED_HEADERS, EXTENDS))
-
-SECRET_NAMES = frozenset(
-    {
-        "PASSWORD",
-        "TOKEN",
-        "SECRET",
-        "PRIVATE_KEY",
-        "ACCESS_KEY",
-        "API_KEY",
-        "CREDENTIAL",
-    }
-)
-SECRET_SUFFIXES = tuple(f"_{name}" for name in sorted(SECRET_NAMES))
-HOST_CALL_MARKERS = (
-    "re." + "compile(",
-    "regexp.new(",
-    "pattern.compile(",
-    "regex.compile(",
-    "eval(",
-    "exec(",
-    "system(",
-)
-
-
-@dataclass(frozen=True)
-class Diagnostic:
-    code: str
-    message: str
-    path: str
-    line: int = 0
-
-    @property
-    def help_path(self) -> str:
-        root = "CRITICAL" if self.code == SECURITY else "ERROR"
-        return f"docs/{root}/{self.code}.md"
-
-    def render(self) -> str:
-        location = self.path if self.line == 0 else f"{self.path}:{self.line}"
-        return f"{self.code} ERROR: {self.message} [{location}] help={self.help_path}"
-
-
-@dataclass(frozen=True)
-class Record:
-    name: str
-    value: str
-    line: int
-
-
-@dataclass(frozen=True)
-class Document:
-    path: str
-    version: str
-    namespace: str
-    environment: str
-    extends: str | None
-    constants: dict[str, str]
-
-
-def has_interpolation(value: str) -> bool:
-    for index, char in enumerate(value[:-1]):
-        if char != "$":
-            continue
-        following = value[index + 1]
-        if (
-            following in "({$@"
-            or following == "_"
-            or following.isalpha()
-            or following.isdigit()
-        ):
-            return True
-    return False
-
-
-def secret_name(name: str) -> bool:
-    return name in SECRET_NAMES or name.endswith(SECRET_SUFFIXES)
-
-
-def secret_value(value: str) -> bool:
-    lowered = value.lower()
-    if "private-key" in lowered or "private_key" in lowered or "-----begin" in lowered:
-        return True
-    if lowered.startswith(("ghp_", "github_pat_", "glpat-", "sk-", "xoxb-", "xoxp-", "npm_")):
-        return True
-    return value.startswith(("AKIA", "ASIA")) and len(value) >= 16
-
-
-def value_problem(value: str) -> str | None:
-    if not value:
-        return "value must not be empty"
-    if any(ord(char) < 0x21 or ord(char) > 0x7E for char in value):
-        return "value must contain only printable non-space ASCII"
-    if "\"" in value or "'" in value:
-        return "quotes are not portable literal syntax"
-    if "`" in value or "$(" in value or has_interpolation(value):
-        return "evaluation, interpolation and command substitution are forbidden"
-    lowered = value.lower()
-    if any(marker in lowered for marker in HOST_CALL_MARKERS):
-        return "host-language constructors and evaluators are forbidden"
-    return None
-
-
-def parse_text(text: str, path: str = "<memory>") -> tuple[Document | None, list[Diagnostic]]:
+def parse_text(
+    text: str, path: str = "<memory>"
+) -> tuple[Document | None, list[Diagnostic]]:
     diagnostics: list[Diagnostic] = []
     if text.startswith("\ufeff"):
-        diagnostics.append(Diagnostic(SYNTAX, "UTF-8 byte-order mark is forbidden", path, 1))
+        diagnostics.append(
+            Diagnostic(SYNTAX, "UTF-8 byte-order mark is forbidden", path, 1)
+        )
     if "\r" in text:
-        diagnostics.append(Diagnostic(SYNTAX, "only LF line endings are canonical", path))
+        diagnostics.append(
+            Diagnostic(SYNTAX, "only LF line endings are canonical", path)
+        )
     if text and not text.endswith("\n"):
         diagnostics.append(Diagnostic(SYNTAX, "document must end with LF", path))
 
     records: list[Record] = []
     seen: dict[str, int] = {}
-    for line_number, line in enumerate(text.split("\n")[:-1] if text.endswith("\n") else text.split("\n"), 1):
+    raw_lines = text.split("\n")[:-1] if text.endswith("\n") else text.split("\n")
+    for line_number, line in enumerate(raw_lines, 1):
         if not line.strip(" ") or line.lstrip(" ").startswith("#"):
-            if "\t" in line or any(ord(char) < 0x20 or ord(char) > 0x7E for char in line):
-                diagnostics.append(Diagnostic(SYNTAX, "blank and comment lines must be printable ASCII without tabs", path, line_number))
+            if "\t" in line or any(
+                ord(char) < 0x20 or ord(char) > 0x7E for char in line
+            ):
+                diagnostics.append(
+                    Diagnostic(
+                        SYNTAX,
+                        "blank and comment lines must be printable ASCII without tabs",
+                        path,
+                        line_number,
+                    )
+                )
             continue
         if line != line.strip() or "=" not in line:
-            diagnostics.append(Diagnostic(SYNTAX, "expected exact SNAKE_CASE=value assignment", path, line_number))
+            diagnostics.append(
+                Diagnostic(
+                    SYNTAX,
+                    "expected exact SNAKE_CASE=value assignment",
+                    path,
+                    line_number,
+                )
+            )
             continue
         name, value = line.split("=", 1)
         if not is_name(name):
-            diagnostics.append(Diagnostic(SYNTAX, f"invalid SNAKE_CASE name: {name or '<empty>'}", path, line_number))
+            display_name = (
+                sanitize_diagnostic_text(name, max_len=64) if name else "<empty>"
+            )
+            diagnostics.append(
+                Diagnostic(
+                    SYNTAX,
+                    f"invalid SNAKE_CASE name: {display_name}",
+                    path,
+                    line_number,
+                )
+            )
             continue
         if name in seen:
-            diagnostics.append(Diagnostic(SEMANTIC, f"duplicate name {name}; first declared on line {seen[name]}", path, line_number))
+            diagnostics.append(
+                Diagnostic(
+                    SEMANTIC,
+                    f"duplicate name {name}; first declared on line {seen[name]}",
+                    path,
+                    line_number,
+                )
+            )
             continue
         seen[name] = line_number
         problem = value_problem(value)
         if problem:
-            diagnostics.append(Diagnostic(SEMANTIC, f"{name}: {problem}", path, line_number))
+            diagnostics.append(
+                Diagnostic(SEMANTIC, f"{name}: {problem}", path, line_number)
+            )
         elif is_equation(name):
             try:
                 parse_expression(value)
             except ExpressionError as error:
-                diagnostics.append(Diagnostic(EXPRESSION, f"{name}: {error}", path, line_number))
+                diagnostics.append(
+                    Diagnostic(EXPRESSION, f"{name}: {error}", path, line_number)
+                )
         if secret_name(name) or secret_value(value):
-            diagnostics.append(Diagnostic(SECURITY, f"secret material is forbidden: {name}", path, line_number))
+            diagnostics.append(
+                Diagnostic(
+                    SECURITY, f"secret material is forbidden: {name}", path, line_number
+                )
+            )
         records.append(Record(name, value, line_number))
 
     for index, required in enumerate(REQUIRED_HEADERS):
         if index >= len(records) or records[index].name != required:
-            diagnostics.append(Diagnostic(SEMANTIC, f"header record {index + 1} must be {required}", path, records[index].line if index < len(records) else 0))
+            line_ref = records[index].line if index < len(records) else 0
+            diagnostics.append(
+                Diagnostic(
+                    SEMANTIC,
+                    f"header record {index + 1} must be {required}",
+                    path,
+                    line_ref,
+                )
+            )
 
     by_name = {record.name: record for record in records}
     for name, record in by_name.items():
         if name.startswith("ENV_DSL_") and name not in RESERVED_HEADERS:
-            diagnostics.append(Diagnostic(SEMANTIC, f"unknown reserved metadata name {name}", path, record.line))
+            diagnostics.append(
+                Diagnostic(
+                    SEMANTIC,
+                    f"unknown reserved metadata name {name}",
+                    path,
+                    record.line,
+                )
+            )
 
     version = by_name.get(VERSION)
     namespace = by_name.get(NAMESPACE)
     environment = by_name.get(ENVIRONMENT)
     extends = by_name.get(EXTENDS)
     if version and version.value != "1":
-        diagnostics.append(Diagnostic(SEMANTIC, "ENV_DSL_VERSION must equal 1", path, version.line))
-    if namespace and not is_name(namespace.value):
-        diagnostics.append(Diagnostic(SEMANTIC, "ENV_DSL_NAMESPACE value must be a valid name", path, namespace.line))
-    if environment and not is_name(environment.value):
-        diagnostics.append(Diagnostic(SEMANTIC, "ENV_DSL_ENVIRONMENT value must be a valid name", path, environment.line))
-    if extends and not is_name(extends.value):
-        diagnostics.append(Diagnostic(SEMANTIC, "ENV_DSL_EXTENDS value must be a valid name", path, extends.line))
+        diagnostics.append(
+            Diagnostic(SEMANTIC, "ENV_DSL_VERSION must equal 1", path, version.line)
+        )
+    for hdr, label in (
+        (namespace, "ENV_DSL_NAMESPACE"),
+        (environment, "ENV_DSL_ENVIRONMENT"),
+        (extends, "ENV_DSL_EXTENDS"),
+    ):
+        if hdr and not is_name(hdr.value):
+            diagnostics.append(
+                Diagnostic(
+                    SEMANTIC, f"{label} value must be a valid name", path, hdr.line
+                )
+            )
 
     if environment:
         if environment.value == "BASE":
             if extends:
-                diagnostics.append(Diagnostic(SEMANTIC, "BASE must not declare ENV_DSL_EXTENDS", path, extends.line))
+                diagnostics.append(
+                    Diagnostic(
+                        SEMANTIC,
+                        "BASE must not declare ENV_DSL_EXTENDS",
+                        path,
+                        extends.line,
+                    )
+                )
         elif not extends:
-            diagnostics.append(Diagnostic(SEMANTIC, "non-BASE environment must declare ENV_DSL_EXTENDS as record 4", path, environment.line))
+            diagnostics.append(
+                Diagnostic(
+                    SEMANTIC,
+                    "non-BASE environment must declare ENV_DSL_EXTENDS as record 4",
+                    path,
+                    environment.line,
+                )
+            )
         elif len(records) < 4 or records[3].name != EXTENDS:
-            diagnostics.append(Diagnostic(SEMANTIC, "ENV_DSL_EXTENDS must be header record 4", path, extends.line))
+            diagnostics.append(
+                Diagnostic(
+                    SEMANTIC,
+                    "ENV_DSL_EXTENDS must be header record 4",
+                    path,
+                    extends.line,
+                )
+            )
         elif extends.value == environment.value:
-            diagnostics.append(Diagnostic(SEMANTIC, "environment cannot extend itself", path, extends.line))
+            diagnostics.append(
+                Diagnostic(
+                    SEMANTIC, "environment cannot extend itself", path, extends.line
+                )
+            )
 
     if not version or not namespace or not environment:
         return None, diagnostics
-    constants = {
-        record.name: record.value
-        for record in records
-        if record.name not in RESERVED_HEADERS
-    }
-    document = Document(
-        path=path,
-        version=version.value,
-        namespace=namespace.value,
-        environment=environment.value,
-        extends=extends.value if extends else None,
-        constants=constants,
+    constants = {r.name: r.value for r in records if r.name not in RESERVED_HEADERS}
+    return (
+        Document(
+            path=path,
+            version=version.value,
+            namespace=namespace.value,
+            environment=environment.value,
+            extends=extends.value if extends else None,
+            constants=constants,
+        ),
+        diagnostics,
     )
-    return document, diagnostics
 
 
 def parse_file(path: Path) -> tuple[Document | None, list[Diagnostic]]:
     try:
         raw = read_regular_bytes(path)
     except OSError as error:
-        return None, [Diagnostic(SYNTAX, f"cannot read document: {error}", path.as_posix())]
+        return None, [
+            Diagnostic(SYNTAX, f"cannot read document: {error}", path.as_posix())
+        ]
     try:
         text = raw.decode("utf-8", errors="strict")
     except UnicodeDecodeError as error:
-        return None, [Diagnostic(SYNTAX, f"document is not UTF-8: {error}", path.as_posix())]
+        return None, [
+            Diagnostic(SYNTAX, f"document is not UTF-8: {error}", path.as_posix())
+        ]
     return parse_text(text, path.as_posix())
-
-
-def merge_documents(documents: Sequence[Document]) -> tuple[dict[str, str], list[Diagnostic]]:
-    diagnostics: list[Diagnostic] = []
-    if not documents:
-        return {}, [Diagnostic(LAYER, "at least one document is required", "<chain>")]
-    base = documents[0]
-    if base.environment != "BASE" or base.extends is not None:
-        diagnostics.append(Diagnostic(LAYER, "first document must be BASE without ENV_DSL_EXTENDS", base.path))
-    environments: set[str] = set()
-    merged: dict[str, str] = {}
-    previous: Document | None = None
-    for document in documents:
-        if document.environment in environments:
-            diagnostics.append(Diagnostic(LAYER, f"environment appears more than once: {document.environment}", document.path))
-        environments.add(document.environment)
-        if document.version != base.version or document.namespace != base.namespace:
-            diagnostics.append(Diagnostic(LAYER, "all layers must share version and namespace", document.path))
-        if previous is not None and document.extends != previous.environment:
-            diagnostics.append(Diagnostic(LAYER, f"{document.environment} must extend immediate parent {previous.environment}", document.path))
-        merged.update(document.constants)
-        previous = document
-    return merged, diagnostics
 
 
 def evaluate_constants(
@@ -290,8 +309,7 @@ def evaluate_constants(
     metadata: dict[str, str] | None = None,
     path: str = "<evaluation>",
 ) -> tuple[dict[str, Scalar], list[Diagnostic]]:
-    sources = dict(metadata or {})
-    sources.update(constants)
+    sources = {**(metadata or {}), **constants}
     nodes: dict[str, ExpressionNode] = {}
     diagnostics: list[Diagnostic] = []
     for name, source in constants.items():
@@ -304,20 +322,13 @@ def evaluate_constants(
     for name, node in nodes.items():
         for reference in sorted(expression_references(node)):
             if reference not in sources:
-                diagnostics.append(
-                    Diagnostic(
-                        EXPRESSION,
-                        f"{name}: reference @{reference} is undefined after layering",
-                        path,
-                    )
-                )
+                msg = f"{name}: reference @{reference} is undefined after layering"
+                diagnostics.append(Diagnostic(EXPRESSION, msg, path))
     cycle, topo_order = analyze_equation_graph(nodes)
     if cycle:
         diagnostics.append(
             Diagnostic(
-                EXPRESSION,
-                f"cyclic equation reference: {' -> '.join(cycle)}",
-                path,
+                EXPRESSION, f"cyclic equation reference: {' -> '.join(cycle)}", path
             )
         )
     if diagnostics:
@@ -333,9 +344,8 @@ def evaluate_constants(
             raise ExpressionError(f"referenced equation @{name} failed evaluation")
         if name not in sources:
             raise ExpressionError(f"reference @{name} is undefined after layering")
-        value = coerce_constant(sources[name])
-        evaluated[name] = value
-        return value
+        evaluated[name] = coerce_constant(sources[name])
+        return evaluated[name]
 
     for name in topo_order:
         try:
@@ -350,14 +360,15 @@ def evaluate_constants(
             diagnostics.append(Diagnostic(EXPRESSION, f"{name}: {error}", path))
 
     for name in constants:
-        if name in evaluated or name in failed_equations:
-            continue
-        try:
-            evaluated[name] = coerce_constant(sources[name])
-        except ExpressionError as error:
-            diagnostics.append(Diagnostic(EXPRESSION, f"{name}: {error}", path))
+        if name not in evaluated and name not in failed_equations:
+            try:
+                evaluated[name] = coerce_constant(sources[name])
+            except ExpressionError as error:
+                diagnostics.append(Diagnostic(EXPRESSION, f"{name}: {error}", path))
 
-    return {name: evaluated[name] for name in constants if name in evaluated}, diagnostics
+    return {
+        name: evaluated[name] for name in constants if name in evaluated
+    }, diagnostics
 
 
 def render_diagnostics(diagnostics: Iterable[Diagnostic]) -> None:
@@ -365,11 +376,25 @@ def render_diagnostics(diagnostics: Iterable[Diagnostic]) -> None:
         print(diagnostic.render())
 
 
-def command_validate(paths: Sequence[Path]) -> int:
+def _load_chain(
+    paths: Sequence[Path],
+) -> tuple[list[Document], dict[str, str], list[Diagnostic]]:
+    documents: list[Document] = []
     diagnostics: list[Diagnostic] = []
     for path in paths:
-        _, current = parse_file(path)
+        document, current = parse_file(path)
         diagnostics.extend(current)
+        if document:
+            documents.append(document)
+    if diagnostics:
+        return documents, {}, diagnostics
+    merged, layer_diags = merge_documents(documents)
+    diagnostics.extend(layer_diags)
+    return documents, merged, diagnostics
+
+
+def command_validate(paths: Sequence[Path]) -> int:
+    diagnostics = [diag for path in paths for diag in parse_file(path)[1]]
     if diagnostics:
         render_diagnostics(diagnostics)
         print(f"ENV-FAIL: failed ({len(diagnostics)} errors)")
@@ -379,18 +404,7 @@ def command_validate(paths: Sequence[Path]) -> int:
 
 
 def command_merge(paths: Sequence[Path]) -> int:
-    documents: list[Document] = []
-    diagnostics: list[Diagnostic] = []
-    for path in paths:
-        document, current = parse_file(path)
-        diagnostics.extend(current)
-        if document:
-            documents.append(document)
-    if not diagnostics:
-        merged, current = merge_documents(documents)
-        diagnostics.extend(current)
-    else:
-        merged = {}
+    _, merged, diagnostics = _load_chain(paths)
     if diagnostics:
         render_diagnostics(diagnostics)
         print(f"ENV-FAIL: failed ({len(diagnostics)} errors)")
@@ -401,17 +415,7 @@ def command_merge(paths: Sequence[Path]) -> int:
 
 
 def command_evaluate(paths: Sequence[Path]) -> int:
-    documents: list[Document] = []
-    diagnostics: list[Diagnostic] = []
-    for path in paths:
-        document, current = parse_file(path)
-        diagnostics.extend(current)
-        if document:
-            documents.append(document)
-    merged: dict[str, str] = {}
-    if not diagnostics:
-        merged, current = merge_documents(documents)
-        diagnostics.extend(current)
+    documents, merged, diagnostics = _load_chain(paths)
     evaluated: dict[str, Scalar] = {}
     if not diagnostics and documents:
         final = documents[-1]
@@ -422,8 +426,8 @@ def command_evaluate(paths: Sequence[Path]) -> int:
         }
         if final.extends:
             metadata[EXTENDS] = final.extends
-        evaluated, current = evaluate_constants(merged, metadata, final.path)
-        diagnostics.extend(current)
+        evaluated, eval_diags = evaluate_constants(merged, metadata, final.path)
+        diagnostics.extend(eval_diags)
     if diagnostics:
         render_diagnostics(diagnostics)
         print(f"ENV-FAIL: failed ({len(diagnostics)} errors)")
@@ -441,12 +445,11 @@ def command_self_test() -> int:
         "READY_CONDITION=@DOUBLE_EXPRESSION==6&&@ENV_DSL_ENVIRONMENT==:BASE\n"
     )
     document, diagnostics = parse_text(valid)
+    assert document is not None
     evaluated, expression_diagnostics = evaluate_constants(
-        document.constants,
-        {VERSION: "1", NAMESPACE: "SELF_TEST", ENVIRONMENT: "BASE"},
+        document.constants, {VERSION: "1", NAMESPACE: "SELF_TEST", ENVIRONMENT: "BASE"}
     )
-    invalid = valid + "HOME_VALUE=${HOME}\n"
-    _, rejected = parse_text(invalid)
+    _, rejected = parse_text(valid + "HOME_VALUE=${HOME}\n")
     if (
         diagnostics
         or expression_diagnostics
@@ -462,14 +465,13 @@ def command_self_test() -> int:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="command", required=True)
-    validate = subparsers.add_parser("validate", help="validate Env DSL documents")
-    validate.add_argument("paths", nargs="+", type=Path)
-    merge = subparsers.add_parser("merge", help="validate and merge an explicit environment chain")
-    merge.add_argument("paths", nargs="+", type=Path)
-    evaluate = subparsers.add_parser(
-        "evaluate", help="validate, layer and evaluate portable equations"
-    )
-    evaluate.add_argument("paths", nargs="+", type=Path)
+    for cmd, help_text in (
+        ("validate", "validate Env DSL documents"),
+        ("merge", "validate and merge an explicit environment chain"),
+        ("evaluate", "validate, layer and evaluate portable equations"),
+    ):
+        sub = subparsers.add_parser(cmd, help=help_text)
+        sub.add_argument("paths", nargs="+", type=Path)
     subparsers.add_parser("self-test", help="run an embedded deterministic smoke test")
     return parser
 
