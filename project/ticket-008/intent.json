@@ -1,0 +1,108 @@
+{
+  "schema": "new-project.intent/v3",
+  "ticket": "ticket-008",
+  "summary": "Modularize env_dsl_io and harden iterative eval, symlink ancestors, and embedded secrets",
+  "workstream": "integration",
+  "classification": {
+    "kind": "BUG",
+    "priority": "P1",
+    "origin": "health"
+  },
+  "allowedPaths": [
+    "project/ticket-008/**",
+    "project/ticket-006/README.md",
+    "project/ticket-007/README.md",
+    "TODO.md",
+    "project/TICKETS.md",
+    "dsl-manifest.json",
+    "tests/env_dsl_check.py",
+    "tests/env_dsl_expr.py",
+    "tests/env_dsl_io.py",
+    "tests/test_env_dsl.py"
+  ],
+  "forbiddenPaths": [
+    "project/ticket-*/user-*.md"
+  ],
+  "stacks": [],
+  "dependsOn": [],
+  "conflictsWith": [],
+  "integrationTicket": null,
+  "delivery": {
+    "acceptedBaseSha": "d4fd1a9f4a6260a27d4920e794b3572d82b51813",
+    "targetBranch": "main",
+    "outcome": "Extract tests/env_dsl_io.py under 500 lines across all modules, make evaluate_node iterative with short-circuiting and ASCII-only digit scanning, harden symlink-ancestor and inode parity checks, detect embedded URI/token/JWT secrets, sanitize diagnostic rendering, and synchronize dsl-manifest.json.",
+    "nonGoals": [
+      "Do not modify spec/env-dsl.abnf or spec/ENV_DSL.md wire specifications",
+      "Do not add runtime dependencies"
+    ],
+    "complexity": "S",
+    "estimatedMinutes": 20,
+    "budgets": {
+      "maxImplementationFiles": 5,
+      "maxAffectedComponents": 2,
+      "maxPublicInterfaceChanges": 1,
+      "maxRuntimeDependencies": 0
+    },
+    "architecture": {
+      "status": "accepted",
+      "decision": "Separate regular-file symlink/inode guards, diagnostic sanitization, and secret/value scanners into tests/env_dsl_io.py while converting tests/env_dsl_expr.py AST evaluation to an iterative frame stack and keeping public re-exports in tests/env_dsl_check.py.",
+      "components": [
+        {
+          "name": "env-dsl-validator-and-tests",
+          "paths": [
+            "tests/env_dsl_check.py",
+            "tests/env_dsl_expr.py",
+            "tests/env_dsl_io.py",
+            "tests/test_env_dsl.py"
+          ]
+        },
+        {
+          "name": "dsl-manifest-binding",
+          "paths": [
+            "dsl-manifest.json"
+          ]
+        }
+      ],
+      "responsibilityChanges": false,
+      "interfaceChanges": [
+        "Register tests/env_dsl_io.py and update parser-contract SHA-256 digests in dsl-manifest.json"
+      ],
+      "dataChanges": [],
+      "ui": {
+        "impact": "none",
+        "states": [],
+        "evidence": []
+      },
+      "rollback": "Revert this bounded commit via protected PR delivery."
+    },
+    "runtimeDependencies": [],
+    "validation": [
+      {
+        "criterion": "AC-01",
+        "commands": [
+          "ruff check --no-cache tests",
+          "python3 -m unittest discover -s tests -p 'test_*.py' -v"
+        ],
+        "evidence": "project/ticket-008/README.md"
+      },
+      {
+        "criterion": "AC-02",
+        "commands": [
+          "python3 -I tests/env_dsl_check.py self-test",
+          "pytest -q"
+        ],
+        "evidence": "project/ticket-008/README.md"
+      },
+      {
+        "criterion": "AC-03",
+        "commands": [
+          "python3 tests/env_dsl_check.py validate examples/valid/dsl-check.env examples/valid/subllm-credential-strategies.env",
+          "python3 ../dsl/src/dsl_check.py validate dsl-manifest.json",
+          "./project/governance-check.sh --base origin/main",
+          "wellman check"
+        ],
+        "evidence": "project/ticket-008/README.md"
+      }
+    ]
+  }
+}
